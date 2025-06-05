@@ -6,39 +6,59 @@ from kopen_data_builder.validator import load_metadata, validate_metadata
 
 
 def test_validate_complete_metadata() -> None:
-    """Test with a complete metadata YAML containing all required and optional fields."""
     content = """\
 name: seoul-public-bike
 title: Seoul Public Bicycle Rental Data
-description: >
+description: |-
   Public rental data of Seoul’s public bike system including rental/return
   time and stations.
 license: Public Domain
 source_url: https://data.seoul.go.kr/dataList/OA-15242/S/1/datasetView.do
 language: [ko]
-category: transportation
-tags: [bike, seoul, mobility]
-split_type: by_year
-update_frequency: monthly
-copyright: Seoul Metropolitan Government
-processed_note: Cleaned column names and removed missing values
+split_type: by_column_year
+split_column: rental_start_time
+split_column_format: "%Y-%m-%d %H:%M:%S"
 columns:
-  - Rental Time: Date and time when the bike was rented
-  - Return Time: Date and time when the bike was returned
+  rental_start_time:
+    type: datetime
+    description: Date and time when the rental started
+  distance_km:
+    type: float
+    description: Distance traveled in kilometers
 """
     with tempfile.NamedTemporaryFile("w+", delete=False, suffix=".yaml") as f:
         f.write(content)
         f.flush()
         metadata: dict[str, Any] = load_metadata(Path(f.name))
-        missing: list[str] = validate_metadata(metadata)
-        assert missing == []
+        errors = validate_metadata(metadata)
+        assert errors == []
 
 
 def test_validate_missing_required_fields() -> None:
-    """Test with incomplete metadata missing several required fields."""
-    incomplete: dict[str, Any] = {"name": "test-dataset", "description": "Missing title and others"}
-    missing: list[str] = validate_metadata(incomplete)
-    assert "title" in missing
-    assert "license" in missing
-    assert "source_url" in missing
-    assert "language" in missing
+    metadata: dict[str, Any] = {"name": "incomplete-dataset", "description": "Missing fields"}
+    errors = validate_metadata(metadata)
+    assert "Missing required field: 'title'" in errors
+    assert "Missing required field: 'license'" in errors
+    assert "Missing required field: 'source_url'" in errors
+    assert "Missing required field: 'language'" in errors
+
+
+def test_validate_invalid_column_type() -> None:
+    content = """\
+name: invalid-columns
+title: Bad Column Types
+description: Test invalid column types
+license: CC-BY-4.0
+source_url: https://example.com
+language: [en]
+columns:
+  start_time:
+    type: timestamp
+    description: Invalid type
+"""
+    with tempfile.NamedTemporaryFile("w+", delete=False, suffix=".yaml") as f:
+        f.write(content)
+        f.flush()
+        metadata = load_metadata(Path(f.name))
+        errors = validate_metadata(metadata)
+        assert any("Column 'start_time' has invalid type 'timestamp'" in e for e in errors)

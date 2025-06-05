@@ -5,17 +5,16 @@ from typing import Any, Union
 
 import yaml  # type: ignore
 
-REQUIRED_FIELDS = ["name", "title", "description", "license", "source_url", "language"]
-
-OPTIONAL_FIELDS = [
-    "category",
-    "tags",
-    "split_type",
-    "update_frequency",
-    "copyright",
-    "processed_note",
-    "columns",
+REQUIRED_FIELDS = [
+    "name",
+    "title",
+    "description",
+    "license",
+    "source_url",
+    "language",
 ]
+
+ALLOWED_COLUMN_TYPES = {"string", "int", "float", "datetime", "bool"}
 
 
 def load_metadata(path: Union[str, Path]) -> dict[str, Any]:
@@ -26,6 +25,34 @@ def load_metadata(path: Union[str, Path]) -> dict[str, Any]:
 
 
 def validate_metadata(metadata: dict[str, Any]) -> list[str]:
-    """Return a list of missing required fields from the metadata dictionary."""
-    missing = [field for field in REQUIRED_FIELDS if field not in metadata]
-    return missing
+    """Return a list of validation error messages."""
+    errors = []
+
+    # Check required fields
+    for field in REQUIRED_FIELDS:
+        if field not in metadata:
+            errors.append(f"Missing required field: '{field}'")
+
+    # Check columns field (if present)
+    columns = metadata.get("columns")
+    if columns:
+        if not isinstance(columns, dict):
+            errors.append("The 'columns' field must be a dictionary of column definitions.")
+        else:
+            for col_name, col_info in columns.items():
+                if not isinstance(col_info, dict):
+                    errors.append(
+                        f"Column '{col_name}' must be a dictionary with 'type' and 'description'."
+                    )
+                    continue
+                col_type = col_info.get("type")
+                if not col_type:
+                    errors.append(f"Column '{col_name}' is missing 'type'.")
+                elif col_type not in ALLOWED_COLUMN_TYPES:
+                    sorted_types = ", ".join(sorted(ALLOWED_COLUMN_TYPES))
+                    errors.append(
+                        f"Column '{col_name}' has invalid type '{col_type}'. "
+                        f"Allowed types: {sorted_types}"
+                    )
+
+    return errors

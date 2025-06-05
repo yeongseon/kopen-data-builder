@@ -122,7 +122,7 @@ release-major:
 
 .PHONY: commit-version
 commit-version:
-	@VERSION=$$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+' src/mycli/__init__.py); 	echo "🔖 Releasing version $$VERSION"; 	git add src/mycli/__init__.py && 	git commit -m "🔖 Release v$$VERSION" && 	git tag -a v$$VERSION -m "Release v$$VERSION" && 	git push origin main --tags
+	@VERSION=$$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+' src/kopen-data-builder/__init__.py); 	echo "🔖 Releasing version $$VERSION"; 	git add src/kopen-data-builder/__init__.py && 	git commit -m "🔖 Release v$$VERSION" && 	git tag -a v$$VERSION -m "Release v$$VERSION" && 	git push origin main --tags
 
 # -----------------------------
 # 📚 Documentation

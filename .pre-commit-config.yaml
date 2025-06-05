@@ -3,24 +3,23 @@ repos:
     rev: 24.3.0
     hooks:
       - id: black
-        language_version: python3.9
+        language_version: python3
         args: ["--line-length=100", "--target-version=py39"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.11.11
     hooks:
       - id: ruff
+        language_version: python3
         args: ["--fix", "--target-version=py39"]
-        additional_dependencies: []
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.15.0
     hooks:
       - id: mypy
-        language_version: python3.9
+        language_version: python3
         additional_dependencies: ["types-requests", "typer", "requests"]
         args: [
-          "--strict",
-          "--python-version=3.9",
-          "src"
+          "--config-file=pyproject.toml",
+          "--explicit-package-bases"
         ]

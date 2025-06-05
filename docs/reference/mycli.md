@@ -1,3 +1,3 @@
-# `mycli` API Reference
+# `kopen-data-builder` API Reference
 
-::: mycli.cli
+::: kopen-data-builder.cli

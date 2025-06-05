@@ -1,4 +1,4 @@
-# 🧰 Python Project Template
+# 🧰 Korea Open Data Builder
 
 A modern, batteries-included Python project template for building CLI tools with best practices.
 
@@ -22,7 +22,7 @@ A modern, batteries-included Python project template for building CLI tools with
 
 ```
 python-project-template/
-├── src/mycli/              # CLI source code
+├── src/kopen-data-builder/              # CLI source code
 ├── tests/                  # Test suite
 ├── docs/                   # Documentation source
 ├── pyproject.toml          # Build & dependency configuration

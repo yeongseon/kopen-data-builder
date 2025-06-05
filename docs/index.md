@@ -1,12 +1,12 @@
-# Welcome to `mycli` Documentation 📘
+# Welcome to `kopen-data-builder` Documentation 📘
 
-`mycli` is a Python-based CLI tool starter template built with [Typer](https://typer.tiangolo.com/) and modern development tools. This documentation provides an overview of its usage, structure, and development workflow.
+`kopen-data-builder` is a Python-based CLI tool starter template built with [Typer](https://typer.tiangolo.com/) and modern development tools. This documentation provides an overview of its usage, structure, and development workflow.
 
 ---
 
-## 🚀 What is `mycli`?
+## 🚀 What is `kopen-data-builder`?
 
-`mycli` helps you:
+`kopen-data-builder` helps you:
 
 - Bootstrap new CLI projects with best practices.
 - Use `Typer` for intuitive, type-safe command-line interfaces.
@@ -21,13 +21,13 @@
 Once installed, run the CLI with:
 
 ```bash
-mycli --help
+kopen-data-builder --help
 ```
 
 Example:
 
 ```bash
-mycli hello --name Alice
+kopen-data-builder hello --name Alice
 ```
 
 ---
@@ -35,9 +35,9 @@ mycli hello --name Alice
 ## 🧱 Project Structure
 
 ```
-mycli/
+kopen-data-builder/
 ├── src/
-│   └── mycli/
+│   └── kopen-data-builder/
 │       ├── __init__.py
 │       └── cli.py
 ├── tests/

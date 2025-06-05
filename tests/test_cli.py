@@ -1,6 +1,6 @@
 from typer.testing import CliRunner
 
-from mycli.cli import app
+from kopen_data_builder.cli import app
 
 runner = CliRunner()
 

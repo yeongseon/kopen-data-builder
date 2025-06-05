@@ -22,8 +22,8 @@ docs/
 ## ⚙️ MkDocs Configuration (`mkdocs.yml`)
 
 ```yaml
-site_name: Python Project Template
-site_description: A modern Python project template with CLI, tests, docs, and automation
+site_name: Korea Open Data Builder
+site_description: A universal CLI and SDK tool for transforming Korean public data into Hugging Face-compatible datasets.
 site_author: Yeongseon Choe
 repo_url: https://github.com/yeongseon/python-project-template
 

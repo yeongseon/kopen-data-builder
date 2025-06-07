@@ -71,6 +71,11 @@ precommit:
 precommit-install:
 	hatch run pre-commit install
 
+.PHONY: precommit-reset
+precommit-reset:
+	hatch run pre-commit clean
+	hatch run pre-commit install --overwrite
+
 # -----------------------------
 # 🧪 Testing & Coverage
 # -----------------------------

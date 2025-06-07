@@ -18,7 +18,5 @@ repos:
         language_version: python3
         additional_dependencies: ["types-requests", "typer", "requests"]
         args: [
-          "--config-file=pyproject.toml",
-          "--explicit-package-bases",
-          "--ignore-missing-imports" 
+          "--config-file=pyproject.toml"
         ]

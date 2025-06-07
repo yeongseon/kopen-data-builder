@@ -95,7 +95,7 @@ scripts.test = "pytest -v tests"
 dependencies = ["ruff", "black", "mypy"]
 scripts.lint = [
     "ruff check src tests",
-    "mypy src",
+    "mypy src tests",
     "black --check src tests"
 ]
 scripts.format = [
@@ -136,6 +136,7 @@ known-first-party = ["kopen_data_builder"]
 [tool.mypy]
 python_version = "3.9"
 strict = true
+warn_unused_ignores = false
 explicit_package_bases = true
 ignore_missing_imports = true
 

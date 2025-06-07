@@ -16,7 +16,9 @@ dependencies = [
     "typer[all]",
     "rich",
     "requests",
-    "packaging"
+    "packaging",
+    "polars",
+    "datasets"     
 ]
 
 [project.optional-dependencies]
@@ -31,18 +33,18 @@ dev = [
     "tox",              # Multi-environment test runner
 
     # 🎯 Code quality and static analysis
-    "black",            # Code formatter
-    "ruff",             # Linter and formatter
-    "mypy",             # Static type checker
-    "types-requests",   # Type stubs for the requests library
+    "black==24.3.0",         # Code formatter (same as pre-commit rev)
+    "ruff==0.1.11",          # Linter and formatter (same as pre-commit rev v0.11.11)
+    "mypy==1.15.0",          # Static type checker (same as pre-commit rev)
+    "types-requests",        # Type stubs for the requests library
 
     # 🔁 Pre-commit hooks
-    "pre-commit",       # Run linters and formatters before commits
+    "pre-commit",            # Run linters and formatters before commits
 
     # 📚 Documentation
-    "mkdocs",                  # Documentation generator
-    "mkdocs-material",         # Material theme for MkDocs
-    "mkdocstrings[python]"     # Auto-generate docs from docstrings
+    "mkdocs",                      # Documentation generator
+    "mkdocs-material",             # Material theme for MkDocs
+    "mkdocstrings[python]"        # Auto-generate docs from docstrings
 ]
 
 [project.scripts]
@@ -78,7 +80,7 @@ features = ["dev"]
 
 [tool.hatch.envs.default.scripts]
 lint = ["ruff check src tests", "black --check src tests"]
-typecheck = "mypy src"
+typecheck = "mypy src tests"
 test = "pytest"
 cov = "pytest --cov=src/kopen_data_builder --cov-report=html --cov-report=term"
 check = ["lint", "typecheck", "test"]
@@ -115,11 +117,11 @@ scripts.test = [
 # ⚙ Tool Configurations
 # ----------------------------------------
 [tool.black]
-line-length = 100
+line-length = 120
 target-version = ["py39"]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py39"
 exclude = [".venv", "build", "dist", "__pycache__"]
 src = ["src"]
@@ -134,9 +136,8 @@ known-first-party = ["kopen_data_builder"]
 [tool.mypy]
 python_version = "3.9"
 strict = true
-files = ["src"]
 explicit_package_bases = true
-mypy_path = "src" 
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

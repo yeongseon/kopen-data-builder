@@ -4,14 +4,12 @@ repos:
     hooks:
       - id: black
         language_version: python3
-        args: ["--line-length=100", "--target-version=py39"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.11.11
     hooks:
       - id: ruff
         language_version: python3
-        args: ["--fix", "--target-version=py39"]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.15.0

@@ -1,0 +1,34 @@
+name: 🚀 Release to PyPI
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: 📦 Install Hatch
+        run: pip install hatch
+
+      - name: 🔐 Set up PyPI credentials
+        run: |
+          echo "[pypi]" > ~/.pypirc
+          echo "username = __token__" >> ~/.pypirc
+          echo "password = ${{ secrets.PYPI_API_TOKEN }}" >> ~/.pypirc
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: 📦 Build and publish to PyPI
+        run: hatch publish

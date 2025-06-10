@@ -1,0 +1,39 @@
+name: 🧪 Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run Lint, Typecheck, and Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: 📦 Install Hatch
+        run: pip install hatch
+
+      - name: 📦 Install project with dev dependencies
+        run: hatch run pip install -e ".[dev]"
+
+      - name: 🧹 Lint
+        run: make lint
+
+      - name: 🧪 Typecheck
+        run: make typecheck
+
+      - name: ✅ Test
+        run: make test
+
+      - name: 📊 Coverage
+        run: make cov

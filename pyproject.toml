@@ -18,7 +18,8 @@ dependencies = [
     "requests",
     "packaging",
     "polars",
-    "datasets"     
+    "datasets",
+    "pydantic"
 ]
 
 [project.optional-dependencies]

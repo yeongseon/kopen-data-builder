@@ -14,17 +14,17 @@ import pandas as pd
 
 
 def prepare_hf_repository(
-    output_dir: str,
     dataset_name: str,
     splits: Dict[str, pd.DataFrame],
+    output_dir: str,
 ) -> None:
     """
     Prepare a local directory in Hugging Face dataset format.
 
     Args:
-        output_dir (str): Target directory to prepare.
         dataset_name (str): Name of the dataset.
         splits (dict): Dictionary of split name to pandas DataFrame.
+        output_dir (str): Target directory to prepare.
     """
     repo_dir = Path(output_dir).resolve()
     if repo_dir.exists():
@@ -45,7 +45,7 @@ def prepare_hf_repository(
     # Create dataset card template (optional)
     dataset_card_path = repo_dir / "dataset_infos.json"
     with dataset_card_path.open("w", encoding="utf-8") as f:
-        f.write("{}")  # empty placeholder for now
+        f.write("{}")  # placeholder
 
     print(f"✅ Hugging Face repository prepared at {repo_dir}")
 
@@ -64,5 +64,5 @@ def build_repository(csv_paths: Dict[str, str], dataset_name: str, output_dir: s
         df = pd.read_csv(path)
         splits[name] = df
 
-    prepare_hf_repository(output_dir, dataset_name, splits)
+    prepare_hf_repository(dataset_name, splits, output_dir)
     print("✅ Dataset build process completed.")

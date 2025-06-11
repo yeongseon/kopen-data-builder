@@ -1,54 +1,64 @@
-# src/kopen_data_builder/core/uploader.py
+# kopen_data_builder/core/uploader.py
 
 """
-Uploader module: Uploads the dataset directory to the Hugging Face Hub
-using the huggingface_hub Python client.
+Upload dataset repository to Hugging Face Hub.
+This module provides functionality to upload a prepared dataset repository
+to the Hugging Face Hub using the CLI.
 """
 
-import logging
+import subprocess
 from pathlib import Path
-from typing import Optional, Union
 
-from huggingface_hub import create_repo, upload_folder
-
-logger = logging.getLogger(__name__)
+import typer
 
 
-def upload_to_huggingface(dataset_dir: Union[str, Path], repo_id: str, token: Optional[str] = None) -> None:
+def upload_to_hf(repo_dir: str, repo_id: str) -> None:
     """
-    Uploads the dataset directory to the Hugging Face Hub under the specified repository ID.
+    Upload prepared dataset repository to Hugging Face using CLI.
 
     Args:
-        dataset_dir (str | Path): Local path to the dataset folder (must include metadata and CSV splits).
-        repo_id (str): Hugging Face repo ID in the form "username/repo_name".
-        token (Optional[str]): Optional Hugging Face access token.
-
-    Raises:
-        FileNotFoundError: If the dataset directory does not exist.
-        Exception: On any upload failure.
+        repo_dir (str): Path to the local HF dataset repository directory.
+        repo_id (str): Target Hugging Face repo ID (e.g., username/dataset-name).
     """
-    path = Path(dataset_dir)
-    if not path.exists():
-        raise FileNotFoundError(f"Dataset directory not found: {path}")
+    repo_path = Path(repo_dir).resolve()
+    if not repo_path.exists():
+        raise FileNotFoundError(f"Repository directory does not exist: {repo_dir}")
 
-    logger.info("Preparing to upload to Hugging Face Hub: %s", repo_id)
-
+    typer.echo(f"🚀 Uploading to Hugging Face Hub: {repo_id}")
     try:
-        create_repo(repo_id=repo_id, token=token, repo_type="dataset", exist_ok=True)
+        subprocess.run(["huggingface-cli", "repo", "create", repo_id, "--type", "dataset", "--yes"], check=True)
+    except subprocess.CalledProcessError:
+        typer.echo(f"⚠️  Repository {repo_id} may already exist. Continuing...")
 
-        upload_folder(
-            folder_path=str(path),
-            repo_id=repo_id,
-            repo_type="dataset",
-            token=token,
-            path_in_repo=".",
-        )
+    subprocess.run(["git", "init"], cwd=repo_dir, check=True)
+    subprocess.run(
+        ["git", "remote", "add", "origin", f"https://huggingface.co/datasets/{repo_id}"], cwd=repo_dir, check=True
+    )
+    subprocess.run(["git", "add", "."], cwd=repo_dir, check=True)
+    subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=repo_dir, check=True)
+    subprocess.run(["git", "branch", "-M", "main"], cwd=repo_dir, check=True)
+    subprocess.run(["git", "push", "-u", "origin", "main", "--force"], cwd=repo_dir, check=True)
 
-        logger.info(
-            "Dataset successfully uploaded to Hugging Face: https://huggingface.co/datasets/%s",
-            repo_id,
-        )
+    typer.echo("✅ Upload complete.")
 
-    except Exception as e:
-        logger.error("Failed to upload dataset: %s", str(e))
-        raise
+
+def verify_upload(repo_id: str) -> bool:
+    """
+    Check if the dataset repository exists on Hugging Face.
+
+    Args:
+        repo_id (str): Target Hugging Face repo ID.
+
+    Returns:
+        bool: True if repo exists, False otherwise.
+    """
+    import requests
+
+    url = f"https://huggingface.co/datasets/{repo_id}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        typer.echo(f"✅ Verified: {repo_id} exists on the Hub.")
+        return True
+    else:
+        typer.echo(f"❌ Not found: {repo_id}")
+        return False

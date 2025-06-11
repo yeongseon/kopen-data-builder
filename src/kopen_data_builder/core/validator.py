@@ -1,55 +1,37 @@
 # src/kopen_data_builder/validator.py
 
 """
-Validator module: Performs checks on a dataset directory to ensure it is complete and valid.
-This includes file existence, format consistency, and metadata structure.
+Validator module: Validates dataset metadata against predefined standards
+and returns a structured DatasetMeta object.
 """
 
-import json
-import logging
-from pathlib import Path
+from typing import Any
 
-logger = logging.getLogger(__name__)
+from .models import DatasetMeta
+
+# Allowed values based on Hugging Face dataset metadata standards
+ALLOWED_LICENSES = {"CC-BY-4.0", "MIT", "Apache-2.0"}
+ALLOWED_LANGUAGES = {"ko", "en"}
+ALLOWED_TASKS = {"문서분류", "번역", "요약"}
 
 
-def validate_dataset(path: str) -> bool:
+def validate_metadata(meta: Any) -> DatasetMeta:
     """
-    Validate that a dataset directory contains expected files and structure.
-
-    Args:
-        path (str): Path to the dataset directory.
-
-    Returns:
-        bool: True if the dataset is valid, False otherwise.
+    Validate the user-provided metadata dictionary and
+    return a DatasetMeta object if valid.
 
     Raises:
-        FileNotFoundError: If the path does not exist.
+        ValueError: If required fields are missing or contain invalid values
     """
-    dataset_path = Path(path)
-    if not dataset_path.exists():
-        raise FileNotFoundError(f"Dataset path does not exist: {dataset_path}")
+    # Basic structural/type validation via Pydantic
+    validated = DatasetMeta(**meta)
 
-    metadata_file = dataset_path / "dataset_infos.json"
-    if not metadata_file.exists():
-        logger.warning("Missing metadata file: %s", metadata_file)
-        return False
+    # Additional value validation
+    if validated.license not in ALLOWED_LICENSES:
+        raise ValueError(f"Invalid license: {validated.license}")
+    if not set(validated.language).issubset(ALLOWED_LANGUAGES):
+        raise ValueError(f"Invalid language(s): {validated.language}")
+    if not set(validated.tasks).issubset(ALLOWED_TASKS):
+        raise ValueError(f"Invalid task(s): {validated.tasks}")
 
-    try:
-        with open(metadata_file, "r", encoding="utf-8") as f:
-            metadata = json.load(f)
-        if "splits" not in metadata:
-            logger.warning("Invalid metadata structure: 'splits' key missing")
-            return False
-
-        for _split_name, split_info in metadata["splits"].items():
-            split_path = dataset_path / split_info["path"]
-            if not split_path.exists():
-                logger.warning("Missing split file: %s", split_path)
-                return False
-
-        logger.info("Dataset validation passed: %s", dataset_path)
-        return True
-
-    except Exception as e:
-        logger.error("Validation failed: %s", str(e))
-        return False
+    return validated

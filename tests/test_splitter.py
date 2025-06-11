@@ -1,49 +1,20 @@
-from pathlib import Path
-from typing import Generator
+# tests/test_splitter.py
 
-import polars as pl
-import pytest
+import pandas as pd
 
-from kopen_data_builder.core.splitter import split_by_quarter
-from kopen_data_builder.core.utils import save_csv
-
-TEST_DIR = Path("tests/temp_split")
-INPUT_FILE = TEST_DIR / "data.csv"
-OUTPUT_DIR = TEST_DIR / "split"
+from kopen_data_builder.core.splitter import merge_datasets, split_dataset
 
 
-@pytest.fixture(scope="module")  # type: ignore[misc]
-def sample_quarter_data() -> pl.DataFrame:
-    return pl.DataFrame({"date": ["2024-01-15", "2024-03-31", "2024-04-01", "2024-06-30"], "value": [10, 20, 30, 40]})
+def test_split_dataset_basic() -> None:
+    df = pd.DataFrame({"value": list(range(100))})
+    splits = split_dataset(df, {"train": 0.8, "test": 0.2})
+    assert len(splits["train"]) > 0
+    assert len(splits["test"]) > 0
+    assert len(splits["train"]) + len(splits["test"]) == len(df)
 
 
-@pytest.fixture(autouse=True)  # type: ignore[misc]
-def setup_and_teardown() -> Generator[None, None, None]:
-    TEST_DIR.mkdir(parents=True, exist_ok=True)
-    yield
-    for file in TEST_DIR.rglob("*"):
-        if file.is_file():
-            file.unlink()
-        elif file.is_dir():
-            try:
-                file.rmdir()
-            except OSError:
-                pass  # skip non-empty
-    if TEST_DIR.exists():
-        try:
-            TEST_DIR.rmdir()
-        except OSError:
-            pass
-
-
-def test_split_by_quarter(sample_quarter_data: pl.DataFrame) -> None:
-    save_csv(sample_quarter_data, str(INPUT_FILE))
-    split_by_quarter(str(INPUT_FILE), str(OUTPUT_DIR), date_column="date")
-
-    assert OUTPUT_DIR.exists()
-    output_files = list(OUTPUT_DIR.glob("*.csv"))
-    output_file_names = {f.name for f in output_files}
-
-    assert len(output_file_names) == 2
-    assert "2024Q1.csv" in output_file_names
-    assert "2024Q2.csv" in output_file_names
+def test_merge_datasets() -> None:
+    df1 = pd.DataFrame({"id": [1, 2]})
+    df2 = pd.DataFrame({"id": [3]})
+    merged = merge_datasets([df1, df2])
+    assert len(merged) == 3

@@ -1,5 +1,4 @@
 # tests/test_cli.py
-
 from typer.testing import CliRunner
 
 from kopen_data_builder.cli.main import app
@@ -20,7 +19,8 @@ def test_split_help() -> None:
     """Test that the split command help works."""
     result = runner.invoke(app, ["split", "--help"])
     assert result.exit_code == 0
-    assert "Split dataset" in result.output
+    # Match updated help text from split_cmd.py
+    assert "Split and merge datasets" in result.output
 
 
 def test_metadata_help() -> None:

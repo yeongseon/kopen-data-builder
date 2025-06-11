@@ -20,7 +20,8 @@ dependencies = [
     "polars",
     "pandas",
     "datasets",
-    "pydantic"
+    "pydantic",
+    "scikit-learn"
 ]
 
 [project.optional-dependencies]

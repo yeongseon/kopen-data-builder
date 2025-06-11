@@ -1,7 +1,7 @@
 # kopen_data_builder/core/uploader.py
 
 """
-Upload dataset repository to Hugging Face Hub.
+Uploader module: Uploads prepared dataset repositories to Hugging Face Hub.
 This module provides functionality to upload a prepared dataset repository
 to the Hugging Face Hub using the CLI.
 """

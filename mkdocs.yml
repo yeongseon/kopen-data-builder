@@ -1,7 +1,7 @@
-site_name: Korea Open Data Builder
+site_name: Kopen Data Builder
 site_description: A universal CLI and SDK tool for transforming Korean public data into Hugging Face-compatible datasets.
 site_author: Yeongseon Choe
-repo_url: https://github.com/yeongseon/python-project-template
+repo_url: https://github.com/yeongseon/kopen-data-builder  # 올바른 저장소 URL로 수정
 
 theme:
   name: material
@@ -11,11 +11,11 @@ theme:
 
 nav:
   - Home: index.md
-  - Development: development.md
-  - Release: release.md
-  - Documentation: document.md
+  - Development Guide: development.md
+  - Release Notes: release.md
+  - Usage Guide: document.md
   - API Reference:
-      - CLI: reference/kopen-data-builder.md
+      - CLI: reference/cli.md
 
 docs_dir: docs
 

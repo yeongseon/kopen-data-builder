@@ -162,3 +162,9 @@ directory = "htmlcov"
 # ----------------------------------------
 [tool.hatch.metadata]
 allow-direct-references = true
+
+# ----------------------------------------
+# 📚 MkDocstrings Configuration
+# ----------------------------------------
+[tool.mkdocstrings]
+handlers = { python = { paths = ["src"] } }

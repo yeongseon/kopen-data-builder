@@ -4,33 +4,35 @@
 
 [![PyPI](https://img.shields.io/pypi/v/kopen-data-builder)](https://pypi.org/project/kopen-data-builder/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Docs](https://img.shields.io/badge/docs-wiki-blue)](https://github.com/yeongseon/kopen-data-builder/wiki)
+[![Docs](https://img.shields.io/badge/docs-wiki-blue)](https://yeongseon.github.io/kopen-data-builder/)
 
 ---
 
 ## 🚀 Overview
 
-**Kopen Data Builder** is an open-source CLI and Python SDK designed to convert **Korean public datasets** into [Hugging Face Datasets](https://huggingface.co/docs/datasets) format.
+**Kopen Data Builder** is an open-source **command-line interface (CLI)** and **Python SDK** for converting **Korean public datasets** into the standardized [Hugging Face Datasets](https://huggingface.co/docs/datasets) format.
 
-It streamlines the process of:
+This tool automates the full pipeline:
 
-- Metadata initialization
-- Dataset conversion (from CSV/Excel to `DatasetDict`)
-- Validation and upload to the Hugging Face Hub
+1. Metadata creation and validation  
+2. Preprocessing (optional)  
+3. Dataset splitting or merging  
+4. Hugging Face dataset repository building  
+5. Uploading and verifying on Hugging Face Hub  
 
-Designed for **researchers, data scientists, and public AI practitioners**, this tool makes dataset publishing intuitive and scalable.
+Perfect for **researchers**, **data scientists**, and **public sector AI developers** aiming to share clean, reusable datasets.
 
 ---
 
 ## 🔧 Features
 
-- ✅ CLI + SDK support (`data-builder`)
-- ✅ Metadata template generation
-- ✅ YAML validation and dataset preview
-- ✅ Automatic Hugging Face README creation
-- ✅ SQLite-based dataset registry
-- ✅ Plugin-style preprocessing hooks
-- ✅ Fast data handling with [Polars](https://www.pola.rs/)
+- ✅ Modular CLI with `typer` for each processing step  
+- ✅ YAML-based metadata management  
+- ✅ Custom preprocessing hook support  
+- ✅ Hugging Face-compatible repo structure builder  
+- ✅ Upload automation with verification  
+- ✅ High-performance CSV/Excel handling using [Polars](https://www.pola.rs/)  
+- ✅ Easily testable, extensible, and CI-friendly  
 
 ---
 
@@ -42,35 +44,48 @@ pip install kopen-data-builder
 
 ---
 
-## 🧪 Example Usage
+## 🧪 CLI Usage Example
 
 ```bash
-# 1. Initialize metadata template
-data-builder init-metadata --name seoul-bike
+# 1. Generate metadata.yaml template
+data-builder metadata run --name seoul-bike --output ./metadata.yaml
 
-# 2. Generate dataset from metadata
-data-builder generate-dataset --metadata ./metadata.yaml
+# 2. Run preprocessing (optional)
+data-builder preprocess run --metadata ./metadata.yaml --output ./preprocessed.csv
 
-# 3. Upload to Hugging Face
-data-builder upload --metadata ./metadata.yaml
+# 3. Split dataset into train/valid/test
+data-builder split run --metadata ./metadata.yaml --input ./preprocessed.csv --output ./splits.json
+
+# 4. Build HF repository structure
+data-builder build run cli-test ./splits.json ./hf_repo
+
+# 5. Upload to Hugging Face Hub
+data-builder upload run --repo-dir ./hf_repo --repo-id username/seoul-bike
 ```
 
 ---
 
-## 📁 Project Structure
+## 📁 Updated Project Structure
 
 ```
 kopen-data-builder/
 ├── src/kopen_data_builder/
-│   ├── cli.py
-│   ├── builder.py
-│   ├── validator.py
-│   ├── uploader.py
-│   ├── registry.py
-│   └── hooks/
-│       └── preprocessing.py
+│   ├── cli/
+│   │   ├── main.py
+│   │   ├── metadata_cmd.py
+│   │   ├── preprocess_cmd.py
+│   │   ├── split_cmd.py
+│   │   ├── build_cmd.py
+│   │   └── upload_cmd.py
+│   ├── core/
+│   │   ├── builder.py
+│   │   ├── uploader.py
+│   │   ├── splitter.py
+│   │   └── validator.py
+│   ├── hooks/
+│   │   └── preprocessing.py
+│   └── registry.py
 ├── tests/
-├── registry.db
 ├── pyproject.toml
 ├── README.md
 └── LICENSE
@@ -78,7 +93,7 @@ kopen-data-builder/
 
 ---
 
-## 🌐 Metadata Example (`metadata.yaml`)
+## 🧾 Metadata Example (`metadata.yaml`)
 
 ```yaml
 name: seoul-bike
@@ -94,9 +109,17 @@ tags: [bike, public-data, seoul, mobility]
 
 ---
 
+## 🧑‍💻 Developer Notes
+
+- Commands are modular: each stage (`metadata`, `preprocess`, `split`, `build`, `upload`) is implemented as an independent Typer CLI.
+- Pytest-based test suite with CLI mocks and temporary files ensures isolated coverage.
+- CI workflows provided in `.github/workflows` for linting, tests, and docs.
+
+---
+
 ## 📚 Documentation
 
-👉 Visit our [![Docs](https://img.shields.io/badge/docs-online-blue)](https://yeongseon.github.io/kopen-data-builder/) for full usage guide and developer instructions.
+👉 [**Full Documentation**](https://yeongseon.github.io/kopen-data-builder/) – includes developer guide, CLI reference, and examples.
 
 ---
 

@@ -31,6 +31,7 @@ dev = [
 
     # 🧪 Testing tools
     "pytest",           # Unit testing framework
+    "pytest-mock",      # Mock plugin for pytest
     "pytest-cov",       # Code coverage plugin for pytest
     "tox",              # Multi-environment test runner
 

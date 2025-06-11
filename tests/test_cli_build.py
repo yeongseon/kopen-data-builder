@@ -1,5 +1,3 @@
-# tests/test_cli_build.py
-
 import json
 import os
 import subprocess
@@ -9,6 +7,7 @@ import pandas as pd
 
 
 def test_cli_build_repository() -> None:
+    """Test building a Hugging Face-compatible dataset repository via CLI."""
     df_train = pd.DataFrame({"text": ["a", "b"], "label": [0, 1]})
     df_test = pd.DataFrame({"text": ["c"], "label": [1]})
 
@@ -31,8 +30,11 @@ def test_cli_build_repository() -> None:
                 "kopen_data_builder.cli.main",
                 "build",
                 "run",
+                "--dataset-name",
                 "cli-test",
+                "--csv-json-path",
                 json_path,
+                "--output-dir",
                 out_path,
             ],
             capture_output=True,

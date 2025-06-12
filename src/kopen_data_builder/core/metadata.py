@@ -1,61 +1,54 @@
-# src/kopen_data_builder/core/metadata.py
+# src/kopen_data_builder/core/metadata.py (추가 코드)
 
 """
-Metadata module: Generates a Hugging Face-compatible dataset_infos.json file
-based on the contents of a directory containing split CSV files.
+Metadata generation module: Provides utility to create an initial metadata.yaml template
+for Hugging Face-compatible datasets.
 """
 
-import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, Union
+
+import yaml  # type: ignore[import-untyped]
 
 logger = logging.getLogger(__name__)
 
+# Predefined template for metadata.yaml
+TEMPLATE = {
+    "name": "your-dataset-name",
+    "title": "데이터셋 제목",
+    "description": "간단한 설명",
+    "source_url": "https://example.com",
+    "license": "CC-BY-4.0",
+    "language": ["ko"],
+    "tasks": ["문서분류"],
+    "split_type": "full",
+    "category": "etc",
+    "tags": ["tag1", "tag2"],
+}
 
-def generate_metadata(data_dir: Union[str, Path], output_path: Union[str, Path]) -> Dict[str, Any]:
+
+def init_metadata(output_path: str) -> None:
     """
-    Generate a dataset_infos.json metadata file describing the available splits.
+    Generate an initial metadata.yaml template file at the specified location.
 
     Args:
-        data_dir (str | Path): Directory containing split CSV files.
-        output_path (str | Path): Path to write the generated JSON metadata.
-
-    Returns:
-        dict: The generated metadata dictionary.
+        output_path (str): Target path to save the metadata.yaml file.
 
     Raises:
-        FileNotFoundError: If the input directory does not exist or contains no CSV files.
-        Exception: For any metadata generation or file I/O errors.
+        FileExistsError: If the file already exists at the given path.
     """
-    data_path = Path(data_dir).resolve()
-    out_path = Path(output_path).resolve()
-    out_path.parent.mkdir(parents=True, exist_ok=True)
+    path = Path(output_path).resolve()
 
-    if not data_path.exists():
-        raise FileNotFoundError(f"Split data directory not found: {data_path}")
+    if path.exists():
+        logger.error("Metadata file already exists: %s", path)
+        raise FileExistsError(f"Metadata already exists: {path}")
 
-    files = sorted(data_path.glob("*.csv"))
-    if not files:
-        raise FileNotFoundError(f"No CSV files found in {data_path}")
+    path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        logger.info("Generating metadata from %d files in %s", len(files), data_path)
-
-        infos = {
-            file.stem.lower(): {
-                "description": f"Split file for {file.stem}.",
-                "path": file.name,
-            }
-            for file in files
-        }
-
-        with out_path.open("w", encoding="utf-8") as f:
-            json.dump({"splits": infos}, f, indent=2, ensure_ascii=False)
-
-        logger.info("Metadata saved to: %s", out_path)
-        return {"splits": infos}
-
-    except Exception:
-        logger.exception("Metadata generation failed.")
+        with path.open("w", encoding="utf-8") as f:
+            yaml.safe_dump(TEMPLATE, f, allow_unicode=True, sort_keys=False)
+        logger.info("Metadata template created at: %s", path)
+    except Exception as e:
+        logger.exception("Failed to write metadata template: %s", e)
         raise

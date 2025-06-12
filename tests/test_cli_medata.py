@@ -6,6 +6,31 @@ import subprocess
 import tempfile
 
 
+def test_cli_init_metadata_success() -> None:
+    """Test successful metadata initialization via CLI"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        path = os.path.join(tmpdir, "metadata.yaml")
+
+        result = subprocess.run(
+            [
+                "python",
+                "-m",
+                "kopen_data_builder.cli.main",
+                "--verbose",
+                "metadata",
+                "init",
+                "--output",
+                path,
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode == 0
+        assert "✅ Metadata template created at" in result.stdout
+        assert os.path.exists(path)
+
+
 def test_cli_validate_metadata_success() -> None:
     """Test successful metadata validation via CLI"""
     meta = {

@@ -1,37 +1,36 @@
-import json
+# tests/test_metadata.py
+
+import tempfile
 from pathlib import Path
-from typing import Generator
 
 import pytest
+import yaml  # type: ignore[import-untyped]
 
-from kopen_data_builder.core.metadata import generate_metadata
-
-TEST_DIR = Path("tests/temp_metadata")
-SPLIT_DIR = TEST_DIR / "splits"
-META_FILE = TEST_DIR / "dataset_infos.json"
+from kopen_data_builder.core.metadata import init_metadata
 
 
-@pytest.fixture(autouse=True)  # type: ignore[misc]
-def setup_and_teardown() -> Generator[None, None, None]:
-    SPLIT_DIR.mkdir(parents=True, exist_ok=True)
-    (SPLIT_DIR / "2024Q1.csv").write_text("dummy")
-    (SPLIT_DIR / "2024Q2.csv").write_text("dummy")
-    yield
-    for file in SPLIT_DIR.glob("*.csv"):
-        file.unlink()
-    if META_FILE.exists():
-        META_FILE.unlink()
-    SPLIT_DIR.rmdir()
-    TEST_DIR.rmdir()
+def test_init_metadata_creates_file_with_content() -> None:
+    """Test that init_metadata creates a metadata.yaml file with the correct content."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_path = Path(tmpdir) / "metadata.yaml"
+
+        init_metadata(str(output_path))
+
+        assert output_path.exists(), "metadata.yaml does not exist."
+
+        with output_path.open(encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+
+        assert isinstance(data, dict)
+        assert "name" in data
+        assert data["name"] == "your-dataset-name"
 
 
-def test_generate_metadata() -> None:
-    generate_metadata(str(SPLIT_DIR), str(META_FILE))
-    assert META_FILE.exists()
+def test_init_metadata_raises_if_file_exists() -> None:
+    """Test that init_metadata raises FileExistsError if the file already exists."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_path = Path(tmpdir) / "metadata.yaml"
+        output_path.write_text("Already exists", encoding="utf-8")
 
-    with open(META_FILE, "r", encoding="utf-8") as f:
-        metadata = json.load(f)
-
-    assert "splits" in metadata
-    assert "2024q1" in metadata["splits"]
-    assert metadata["splits"]["2024q1"]["path"] == "2024Q1.csv"
+        with pytest.raises(FileExistsError):
+            init_metadata(str(output_path))

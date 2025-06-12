@@ -13,13 +13,46 @@ from typing import Optional
 
 import typer
 
+from kopen_data_builder.core.metadata import init_metadata
 from kopen_data_builder.core.validator import validate_metadata
 
 logger = logging.getLogger(__name__)
-app = typer.Typer(help="Validate and manage dataset metadata files.")
+app = typer.Typer(help="Manage dataset metadata files.")
 
 
-@app.command()
+@app.command("init", help="Generate a metadata.yaml template.")
+def init(
+    output_path: str = typer.Option(
+        ..., "--output", "-o", prompt="Enter output path for metadata.yaml", help="Path to save metadata.yaml"
+    )
+) -> None:
+    """
+    Initialize a metadata.yaml file at the specified path.
+    This command creates a metadata.yaml file with a predefined template
+    that can be used for Hugging Face datasets.
+
+    Example:
+    $ kopen metadata init --output metadata.yaml
+
+    Args:
+        output_path (str): Path to save the metadata.yaml file.
+
+    Raises:
+        typer.Exit: Exits with code 1 if the file already exists or an error occurs.
+    """
+    try:
+        init_metadata(output_path)
+        typer.secho(f"✅ Metadata template created at: {output_path}", fg=typer.colors.GREEN)
+    except FileExistsError as e:
+        typer.secho(f"❌ {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1) from e
+    except Exception as e:
+        logger.exception("Unexpected error during metadata init.")
+        typer.secho(f"❌ Unexpected error: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1) from e
+
+
+@app.command("validate", help="Validate a metadata JSON file.")
 def validate(
     path: Optional[str] = typer.Option(
         None,

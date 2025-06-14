@@ -12,9 +12,10 @@ import logging
 from typing import Optional
 
 import typer
+import yaml  # type: ignore
 
 from kopen_data_builder.core.metadata import init_metadata
-from kopen_data_builder.core.validator import validate_metadata
+from kopen_data_builder.core.models import DatasetMeta
 
 logger = logging.getLogger(__name__)
 app = typer.Typer(help="Manage dataset metadata files.")
@@ -52,25 +53,25 @@ def init(
         raise typer.Exit(code=1) from e
 
 
-@app.command("validate", help="Validate a metadata JSON file.")
+@app.command("validate", help="Validate a metadata YAML or JSON file.")
 def validate(
     path: Optional[str] = typer.Option(
         None,
-        prompt="Enter the path to the metadata JSON file",
-        help="Path to the metadata JSON file",
+        prompt="Enter the path to the metadata file",
+        help="Path to the metadata file (YAML or JSON)",
     )
 ) -> None:
     """
-    Validate a metadata JSON file via interactive prompt.
+    Validate a metadata YAML or JSON file.
 
     Loads the file, validates it using internal schema rules,
     and prints the parsed and validated result to the terminal.
 
     Example:
-    $ kopen metadata validate --path metadata.json
+    $ kopen metadata validate --path metadata.yaml
 
     Args:
-        path (str): Path to the metadata JSON file to validate.
+        path (str): Path to the metadata file to validate.
 
     Raises:
         typer.Exit: Exits with code 1 if validation fails.
@@ -79,12 +80,17 @@ def validate(
     try:
         if path is None:
             raise typer.BadParameter("path is required")
+
         with open(path, encoding="utf-8") as f:
-            meta = json.load(f)
-        validated = validate_metadata(meta)
+            if path.endswith(".json"):
+                meta = json.load(f)
+            else:
+                meta = yaml.safe_load(f)
+
+        validated = DatasetMeta(**meta)
         logger.info("✅ Metadata validation succeeded.")
         typer.echo("✅ Metadata validation successful:")
-        typer.echo(json.dumps(validated.model_dump(), indent=2, ensure_ascii=False))
+        typer.echo(json.dumps(validated.model_dump(mode="json"), indent=2, ensure_ascii=False))
     except Exception as e:
         logger.exception("❌ Metadata validation failed.")
         typer.echo(f"❌ Validation error: {e}", err=True)

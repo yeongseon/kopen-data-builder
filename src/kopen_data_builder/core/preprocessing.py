@@ -7,55 +7,81 @@ data types, and prepare data for further processing.
 """
 import logging
 import re
+from typing import List
 
 import pandas as pd
+from pandas import DataFrame, Series
 
 logger = logging.getLogger(__name__)
 
 
 def normalize_column_name(name: str) -> str:
-    """Normalize a single column name."""
-    return re.sub(r"\W+", "_", name.strip().lower())
-
-
-def is_date_column(name: str) -> bool:
-    """Determine if a column likely represents a date."""
-    return any(keyword in name.lower() for keyword in ["date", "날짜", "일자"])
-
-
-def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Perform standard preprocessing on a pandas DataFrame:
-    - Normalize column names
-    - Ensure string columns are stripped and consistent
-    - Convert date-like columns to datetime
+    Normalize a column name by:
+    - Converting to lowercase
+    - Replacing non-alphanumeric characters with underscores
+    - Removing leading/trailing and repeated underscores
 
     Args:
-        df (pd.DataFrame): The input raw DataFrame.
+        name (str): Original column name
 
     Returns:
-        pd.DataFrame: The cleaned DataFrame.
+        str: Normalized column name
+    """
+    normalized: str = re.sub(r"\W+", "_", name.strip().lower())
+    normalized = re.sub(r"_+", "_", normalized).strip("_")
+    return normalized
+
+
+def is_probably_date_column(series: Series) -> bool:
+    """
+    Detect whether a column contains mostly date-like values.
+    Returns True if over 80% of non-null values are parseable as datetime.
+    """
+    non_null = series.dropna()
+    if non_null.empty:
+        return False
+
+    parsed = pd.to_datetime(non_null, errors="coerce", utc=True)
+    success_ratio = parsed.notna().sum() / len(parsed)
+    return bool(success_ratio >= 0.8)
+
+
+def preprocess_data(df: DataFrame) -> DataFrame:
+    """
+    Perform standard preprocessing on a pandas DataFrame:
+    1. Normalize column names to lowercase, underscore style
+    2. Clean string columns by stripping whitespace
+    3. Detect and convert date-like columns based on actual values
+
+    Args:
+        df (pd.DataFrame): The input raw DataFrame
+
+    Returns:
+        pd.DataFrame: The cleaned and normalized DataFrame
     """
     df = df.copy()
 
-    # 1. Normalize column names
-    df.columns = [normalize_column_name(col) for col in df.columns]
-    logger.debug("Normalized column names: %s", list(df.columns))
+    # Normalize column names
+    original_columns: List[str] = list(df.columns)  # Avoid mypy error on .tolist()
+    df.columns = [normalize_column_name(col) for col in original_columns]
+    logger.debug("Normalized columns from %s to %s", original_columns, list(df.columns))
 
-    # 2. Convert string-like columns
-    object_cols = df.select_dtypes(include=["object"]).columns
-    for col in object_cols:
+    # Strip whitespace from string columns
+    for col in df.select_dtypes(include=["object", "string"]).columns:
         try:
             df[col] = df[col].astype(str).str.strip()
         except Exception as e:
-            logger.warning("Failed to convert column '%s' to string: %s", col, str(e))
+            logger.warning("Could not process string column '%s': %s", col, e)
 
-    # 3. Convert date columns
+    # Convert date-like columns
     for col in df.columns:
-        if is_date_column(col):
-            try:
-                df[col] = pd.to_datetime(df[col], errors="coerce")
-            except Exception as e:
-                logger.warning("Failed to convert column '%s' to datetime: %s", col, str(e))
+        if not pd.api.types.is_datetime64_any_dtype(df[col]):
+            if is_probably_date_column(df[col]):
+                try:
+                    df[col] = pd.to_datetime(df[col], errors="coerce")
+                    logger.debug("Converted column '%s' to datetime.", col)
+                except Exception as e:
+                    logger.warning("Failed to convert column '%s' to datetime: %s", col, e)
 
     return df

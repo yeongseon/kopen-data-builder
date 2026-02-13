@@ -1,10 +1,3 @@
-# src/kopen_data_builder/core/metadata.py
-
-"""
-Metadata I/O module: Handles generation and loading of metadata.yaml files
-with human-readable comments and schema validation.
-"""
-
 import logging
 from pathlib import Path
 
@@ -46,11 +39,13 @@ def init_metadata(output_path: str) -> None:
 # - For details, visit: https://github.com/yeongseon/kopen-data-builder
 # -----------------------------------------------------------------------------
 
-pretty_name: "Seoul Public Bike Usage (Monthly)"  # Human-readable name
+pretty_name:
+  en: Seoul Public Bike Usage (Monthly)
+  ko: 서울시 공공자전거 이용정보 (월간)
 
-description: |
-  This dataset contains monthly usage data for public bikes in Seoul.
-  Includes trip count, distance, and CO₂ emissions saved.
+description:
+  en: This dataset contains monthly usage data for public bikes in Seoul.
+  ko: 서울시 공공자전거 이용현황을 월 단위로 정리한 데이터셋입니다.
 
 languages:  # Language(s) used in the actual dataset content (not the README)
   - ko
@@ -76,7 +71,8 @@ task_categories:
 task_ids:
   - bike-usage-forecasting  # Optional: fine-grained task identifier
 
-size_categories: 100K<n<1M  # Allowed: n<1K, 1K<n<10K, 10K<n<100K, 100K<n<1M, 1M<n<10M, n>10M
+size_categories:
+  - 100K<n<1M  # Allowed: n<1K, 1K<n<10K, 10K<n<100K, 100K<n<1M, 1M<n<10M, n>10M
 
 source_datasets:
   - original  # Usually: original or list of upstream datasets
@@ -147,6 +143,6 @@ def load_metadata(input_path: str) -> DatasetMeta:
         raise ValueError(f"Invalid metadata format: expected a dictionary, got {type(raw).__name__}")
 
     try:
-        return DatasetMeta.parse_obj(raw)
+        return DatasetMeta.model_validate(raw)
     except ValidationError as e:
         raise ValueError(f"Metadata does not conform to expected schema: {e}") from e

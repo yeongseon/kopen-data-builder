@@ -14,7 +14,7 @@ from typing import Optional
 import typer
 import yaml  # type: ignore
 
-from kopen_data_builder.core.metadata import init_metadata
+from kopen_data_builder.core.metadata import init_metadata, load_metadata
 from kopen_data_builder.core.models import DatasetMeta
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ app = typer.Typer(help="Manage dataset metadata files.")
 def init(
     output_path: str = typer.Option(
         ..., "--output", "-o", prompt="Enter output path for metadata.yaml", help="Path to save metadata.yaml"
-    )
+    ),
 ) -> None:
     """
     Initialize a metadata.yaml file at the specified path.
@@ -59,7 +59,7 @@ def validate(
         None,
         prompt="Enter the path to the metadata file",
         help="Path to the metadata file (YAML or JSON)",
-    )
+    ),
 ) -> None:
     """
     Validate a metadata YAML or JSON file.
@@ -81,13 +81,12 @@ def validate(
         if path is None:
             raise typer.BadParameter("path is required")
 
-        with open(path, encoding="utf-8") as f:
-            if path.endswith(".json"):
+        if path.endswith(".json"):
+            with open(path, encoding="utf-8") as f:
                 meta = json.load(f)
-            else:
-                meta = yaml.safe_load(f)
-
-        validated = DatasetMeta(**meta)
+            validated = DatasetMeta(**meta)
+        else:
+            validated = load_metadata(path)
         logger.info("✅ Metadata validation succeeded.")
         typer.echo("✅ Metadata validation successful:")
         typer.echo(json.dumps(validated.model_dump(mode="json"), indent=2, ensure_ascii=False))

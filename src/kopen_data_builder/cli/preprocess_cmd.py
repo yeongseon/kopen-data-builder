@@ -9,10 +9,10 @@ using built-in cleaning utilities before further transformation or upload.
 
 import logging
 
-import pandas as pd
 import typer
 from typer import Option
 
+from kopen_data_builder.core.io import read_table, write_csv
 from kopen_data_builder.core.preprocessing import preprocess_data
 
 # Create a Typer app for the "preprocess" command group
@@ -34,6 +34,14 @@ def run(
         prompt="📤 Enter the path to save the cleaned output CSV",
         help="Path where the cleaned CSV will be saved",
     ),
+    sheet_name: str = Option(
+        None,
+        help="Excel sheet name (optional, for .xlsx/.xls files).",
+    ),
+    encoding: str = Option(
+        None,
+        help="CSV encoding override (optional).",
+    ),
 ) -> None:
     """
     Preprocess a CSV file and save the cleaned version.
@@ -49,16 +57,16 @@ def run(
         output_csv (str): Path where the cleaned CSV will be saved.
     """
     # 1. Load the input CSV file into a DataFrame
-    logger.info("Loading CSV from: %s", input_csv)
-    df: pd.DataFrame = pd.read_csv(input_csv)
+    logger.info("Loading data from: %s", input_csv)
+    df = read_table(input_csv, encoding=encoding, sheet_name=sheet_name)
 
     # 2. Apply preprocessing (clean column names, strip strings, convert dates)
     logger.info("Preprocessing data...")
-    cleaned: pd.DataFrame = preprocess_data(df)
+    cleaned = preprocess_data(df)
 
     # 3. Save the cleaned DataFrame to the output CSV path
     logger.info("Saving cleaned data to: %s", output_csv)
-    cleaned.to_csv(output_csv, index=False)
+    write_csv(cleaned, output_csv)
 
     # 4. Provide confirmation to the user
     typer.echo(f"✅ Preprocessed data saved to: {output_csv}")

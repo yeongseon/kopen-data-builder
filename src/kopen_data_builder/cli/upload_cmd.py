@@ -28,6 +28,8 @@ def run(
         prompt="📦 Enter the Hugging Face repository ID (e.g., username/dataset-name)",
         help="Target repository ID on Hugging Face (e.g., username/dataset-name).",
     ),
+    token: str | None = typer.Option(None, help="Hugging Face access token (optional)."),
+    private: bool | None = typer.Option(None, help="Create repository as private (optional)."),
 ) -> None:
     """
     Upload the dataset directory to Hugging Face Hub and verify the result.
@@ -40,6 +42,6 @@ def run(
         repo_id (str): The repository ID on Hugging Face where the dataset will be uploaded.
     """
     logger.info(f"Uploading dataset from: {repo_dir} to repo: {repo_id}")
-    upload_to_hf(repo_dir, repo_id)
-    verify_upload(repo_id)
+    upload_to_hf(repo_dir, repo_id, token=token, private=private)
+    verify_upload(repo_id, token=token)
     typer.echo("✅ Dataset successfully uploaded and verified.")

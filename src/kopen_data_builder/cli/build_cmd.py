@@ -12,6 +12,7 @@ import logging
 import typer
 
 from kopen_data_builder.core.builder import build_repository
+from kopen_data_builder.core.metadata import load_metadata
 
 app = typer.Typer(help="Build Hugging Face-compatible dataset structure.")
 logger = logging.getLogger(__name__)
@@ -34,6 +35,10 @@ def run(
         prompt="📁 Enter output directory for the dataset",
         help="Directory where the Hugging Face-compatible dataset structure will be saved",
     ),
+    metadata_path: str = typer.Option(
+        None,
+        help="Path to metadata.yaml (optional).",
+    ),
 ) -> None:
     """
     Build a Hugging Face-compatible dataset from split CSVs.
@@ -53,7 +58,8 @@ def run(
     with open(csv_json_path, "r", encoding="utf-8") as f:
         csv_paths = json.load(f)
 
+    metadata = load_metadata(metadata_path) if metadata_path else None
     logger.info(f"Building dataset repository for: {dataset_name}")
-    build_repository(csv_paths=csv_paths, dataset_name=dataset_name, output_dir=output_dir)
+    build_repository(csv_paths=csv_paths, dataset_name=dataset_name, output_dir=output_dir, metadata=metadata)
 
     typer.echo("✅ Dataset repository prepared.")

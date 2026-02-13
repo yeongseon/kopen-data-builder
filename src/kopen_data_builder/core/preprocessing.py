@@ -5,6 +5,7 @@ Preprocessing module: Contains functions for standardizing and cleaning data in 
 This module provides utilities to normalize column names, convert
 data types, and prepare data for further processing.
 """
+
 import logging
 import re
 from typing import List
@@ -62,8 +63,7 @@ def preprocess_data(df: DataFrame) -> DataFrame:
     """
     df = df.copy()
 
-    # Normalize column names
-    original_columns: List[str] = list(df.columns)  # Avoid mypy error on .tolist()
+    original_columns: List[str] = list(df.columns)
     df.columns = [normalize_column_name(col) for col in original_columns]
     logger.debug("Normalized columns from %s to %s", original_columns, list(df.columns))
 

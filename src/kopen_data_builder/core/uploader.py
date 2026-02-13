@@ -6,13 +6,14 @@ This module provides functionality to upload a prepared dataset repository
 to the Hugging Face Hub using the CLI.
 """
 
-import subprocess
 from pathlib import Path
+from typing import Optional
 
-import typer
+from huggingface_hub import HfApi
+from huggingface_hub.utils import HfHubHTTPError
 
 
-def upload_to_hf(repo_dir: str, repo_id: str) -> None:
+def upload_to_hf(repo_dir: str, repo_id: str, token: Optional[str] = None, private: Optional[bool] = None) -> str:
     """
     Upload prepared dataset repository to Hugging Face using CLI.
 
@@ -24,25 +25,18 @@ def upload_to_hf(repo_dir: str, repo_id: str) -> None:
     if not repo_path.exists():
         raise FileNotFoundError(f"Repository directory does not exist: {repo_dir}")
 
-    typer.echo(f"🚀 Uploading to Hugging Face Hub: {repo_id}")
+    api = HfApi()
     try:
-        subprocess.run(["huggingface-cli", "repo", "create", repo_id, "--type", "dataset", "--yes"], check=True)
-    except subprocess.CalledProcessError:
-        typer.echo(f"⚠️  Repository {repo_id} may already exist. Continuing...")
+        api.create_repo(repo_id, repo_type="dataset", token=token, exist_ok=True, private=private)
+    except HfHubHTTPError:
+        api.create_repo(repo_id, repo_type="dataset", token=token, exist_ok=True)
 
-    subprocess.run(["git", "init"], cwd=repo_dir, check=True)
-    subprocess.run(
-        ["git", "remote", "add", "origin", f"https://huggingface.co/datasets/{repo_id}"], cwd=repo_dir, check=True
-    )
-    subprocess.run(["git", "add", "."], cwd=repo_dir, check=True)
-    subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=repo_dir, check=True)
-    subprocess.run(["git", "branch", "-M", "main"], cwd=repo_dir, check=True)
-    subprocess.run(["git", "push", "-u", "origin", "main", "--force"], cwd=repo_dir, check=True)
+    api.upload_folder(repo_id=repo_id, repo_type="dataset", folder_path=str(repo_path), token=token)
 
-    typer.echo("✅ Upload complete.")
+    return f"https://huggingface.co/datasets/{repo_id}"
 
 
-def verify_upload(repo_id: str) -> bool:
+def verify_upload(repo_id: str, token: Optional[str] = None) -> bool:
     """
     Check if the dataset repository exists on Hugging Face.
 
@@ -52,13 +46,9 @@ def verify_upload(repo_id: str) -> bool:
     Returns:
         bool: True if repo exists, False otherwise.
     """
-    import requests
-
-    url = f"https://huggingface.co/datasets/{repo_id}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        typer.echo(f"✅ Verified: {repo_id} exists on the Hub.")
+    api = HfApi()
+    try:
+        api.repo_info(repo_id, repo_type="dataset", token=token)
         return True
-    else:
-        typer.echo(f"❌ Not found: {repo_id}")
+    except HfHubHTTPError:
         return False

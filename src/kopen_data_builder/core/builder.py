@@ -13,6 +13,9 @@ from typing import Dict
 
 import pandas as pd
 
+from kopen_data_builder.core.models import DatasetMeta
+from kopen_data_builder.core.renderer import render_dataset_card
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,6 +23,7 @@ def prepare_hf_repository(
     dataset_name: str,
     splits: Dict[str, pd.DataFrame],
     output_dir: str,
+    metadata: DatasetMeta | None = None,
 ) -> None:
     """
     Prepare a local directory in Hugging Face dataset format.
@@ -35,7 +39,7 @@ def prepare_hf_repository(
     repo_dir.mkdir(parents=True, exist_ok=True)
 
     _save_splits(repo_dir, splits)
-    _write_readme(repo_dir, dataset_name)
+    _write_readme(repo_dir, dataset_name, metadata)
     _write_placeholder_metadata(repo_dir)
 
     logger.info("✅ Hugging Face repository prepared at %s", repo_dir)
@@ -48,9 +52,12 @@ def _save_splits(repo_dir: Path, splits: Dict[str, pd.DataFrame]) -> None:
         logger.debug("Saved split %s to %s", split_name, split_path)
 
 
-def _write_readme(repo_dir: Path, dataset_name: str) -> None:
+def _write_readme(repo_dir: Path, dataset_name: str, metadata: DatasetMeta | None = None) -> None:
     readme_path = repo_dir / "README.md"
-    content = f"# Dataset: {dataset_name}\n\nThis dataset was prepared for upload to Hugging Face Datasets.\n"
+    if metadata is None:
+        content = f"# Dataset: {dataset_name}\n\nThis dataset was prepared for upload to Hugging Face Datasets.\n"
+    else:
+        content = render_dataset_card(metadata, dataset_name=dataset_name)
     readme_path.write_text(content, encoding="utf-8")
     logger.debug("README.md created at %s", readme_path)
 
@@ -61,7 +68,12 @@ def _write_placeholder_metadata(repo_dir: Path) -> None:
     logger.debug("Empty dataset_infos.json created at %s", placeholder)
 
 
-def build_repository(csv_paths: Dict[str, str], dataset_name: str, output_dir: str) -> None:
+def build_repository(
+    csv_paths: Dict[str, str],
+    dataset_name: str,
+    output_dir: str,
+    metadata: DatasetMeta | None = None,
+) -> None:
     """
     Build the Hugging Face dataset directory structure from CSVs.
 
@@ -76,5 +88,5 @@ def build_repository(csv_paths: Dict[str, str], dataset_name: str, output_dir: s
         splits[name] = df
         logger.debug("Loaded CSV: %s → %s rows", path, len(df))
 
-    prepare_hf_repository(dataset_name, splits, output_dir)
+    prepare_hf_repository(dataset_name, splits, output_dir, metadata=metadata)
     logger.info("✅ Dataset build process completed.")

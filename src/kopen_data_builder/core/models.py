@@ -10,7 +10,7 @@ needed for Hugging Face dataset compatibility.
 from datetime import date
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, field_validator
 
 from kopen_data_builder.core.enums import (
     AnnotationCreator,
@@ -24,31 +24,43 @@ from kopen_data_builder.core.enums import (
 
 
 class SourceAgency(BaseModel):  # type: ignore[misc]
-    en: str  # Name of the dataset provider in English
-    ko: str  # Name of the dataset provider in Korean
+    en: str
+    ko: str
+
+
+class LocalizedText(BaseModel):  # type: ignore[misc]
+    en: Optional[str] = None
+    ko: Optional[str] = None
 
 
 class DatasetMeta(BaseModel):  # type: ignore[misc]
-    pretty_name: str  # Human-readable name of the dataset
-    description: str  # Detailed multi-line description of the dataset
-    languages: List[Language]  # ISO 639-1 codes, e.g., [Language.ko, Language.en]
-    tags: List[str]  # Searchable tags for dataset discovery
-    license: License  # License identifier (Enum)
+    pretty_name: Union[str, LocalizedText]
+    description: Union[str, LocalizedText]
+    languages: List[Language]
+    tags: List[str]
+    license: License
 
-    annotations_creators: List[AnnotationCreator]  # Annotation source (Enum)
-    language_creators: List[LanguageCreator]  # Language creation method (Enum)
-    multilinguality: Multilinguality  # Language structure (Enum)
+    annotations_creators: List[AnnotationCreator]
+    language_creators: List[LanguageCreator]
+    multilinguality: Multilinguality
 
-    task_categories: List[TaskCategory]  # ML task categories (Enum)
-    task_ids: Optional[List[str]] = None  # Fine-grained task identifiers
+    task_categories: List[Union[TaskCategory, str]]
+    task_ids: Optional[List[str]] = None
 
-    size_categories: SizeCategory  # Estimated dataset size category
-    source_datasets: List[str]  # Names of source datasets
-    source_agency: SourceAgency  # Dataset provider names
-    original_url: HttpUrl  # Source data link
+    size_categories: List[SizeCategory]
+    source_datasets: List[str]
+    source_agency: SourceAgency
+    original_url: HttpUrl
 
-    update_frequency: str  # e.g., Monthly, Quarterly, etc.
-    reference_date: Union[str, date]  # Coverage period, can be string or ISO date
-    kogl_type: Union[int, str]  # KOGL license type (e.g., 1, "Type 1 KOGL")
+    update_frequency: str
+    reference_date: Union[str, date]
+    kogl_type: Union[int, str]
 
-    splits: Optional[Dict[str, float]] = None  # e.g., {"train": 0.8, "test": 0.2}
+    splits: Optional[Dict[str, float]] = None
+
+    @field_validator("size_categories", mode="before")
+    @classmethod
+    def _normalize_size_categories(cls, value: Union[SizeCategory, List[SizeCategory]]) -> List[SizeCategory]:
+        if isinstance(value, list):
+            return value
+        return [value]

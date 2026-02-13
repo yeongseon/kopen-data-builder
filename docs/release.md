@@ -1,6 +1,6 @@
 # 🚀 Release Guide
 
-This project uses [Hatch](https://hatch.pypa.io/) to manage versioning and publishing to PyPI. Version numbers are stored in `src/kopen-data-builder/__init__.py`.
+This project uses [Hatch](https://hatch.pypa.io/) to manage versioning and publishing to PyPI. Version numbers are stored in `src/kopen_data_builder/__init__.py`.
 
 ## 📦 Build Package
 
@@ -25,7 +25,7 @@ make release-major  # X.Y.Z → (X+1).0.0
 ```
 
 This will:
-1. Update `__version__` in `src/kopen-data-builder/__init__.py`
+1. Update `__version__` in `src/kopen_data_builder/__init__.py`
 2. Create a Git commit and tag (e.g. `v1.2.3`)
 3. Push the commit and tag to the main branch
 

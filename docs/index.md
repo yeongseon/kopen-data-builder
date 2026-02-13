@@ -1,6 +1,6 @@
 # Welcome to `kopen-data-builder` Documentation 📘
 
-`kopen-data-builder` is a Python-based CLI tool starter template built with [Typer](https://typer.tiangolo.com/) and modern development tools. This documentation provides an overview of its usage, structure, and development workflow.
+`kopen-data-builder` is a Python library and CLI for transforming Korean public data (CSV/Excel) into Hugging Face-compatible datasets. This documentation provides an overview of its usage, structure, and development workflow.
 
 ---
 
@@ -8,11 +8,11 @@
 
 `kopen-data-builder` helps you:
 
-- Bootstrap new CLI projects with best practices.
-- Use `Typer` for intuitive, type-safe command-line interfaces.
-- Apply type checking, linting, and formatting out of the box.
-- Write clean and testable code using `pytest` and `coverage`.
-- Automate your build, release, and documentation tasks.
+- Define metadata for public datasets using a YAML schema aligned with Hugging Face.
+- Preprocess CSV/Excel data with standard normalization.
+- Split datasets into train/test (and future splits) for ML workflows.
+- Build Hugging Face dataset repository structures.
+- Upload and verify datasets on the Hugging Face Hub.
 
 ---
 
@@ -27,7 +27,7 @@ kopen-data-builder --help
 Example:
 
 ```bash
-kopen-data-builder hello --name Alice
+kopen-data-builder metadata init --output metadata.yaml
 ```
 
 ---
@@ -37,9 +37,10 @@ kopen-data-builder hello --name Alice
 ```
 kopen-data-builder/
 ├── src/
-│   └── kopen-data-builder/
+│   └── kopen_data_builder/
 │       ├── __init__.py
-│       └── cli.py
+│       ├── cli/
+│       └── core/
 ├── tests/
 │   └── test_cli.py
 ├── docs/

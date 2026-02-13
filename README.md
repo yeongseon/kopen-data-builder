@@ -33,7 +33,7 @@ Especially helpful for **data scientists**, **AI engineers**, and **public secto
 * ✅ Custom preprocessing support using `hooks/preprocessing.py`
 * ✅ Built-in Hugging Face-compatible repository builder
 * ✅ Upload automation with verification logic
-* ✅ High-performance tabular handling (CSV, Excel) via [Polars](https://www.pola.rs/)
+* ✅ Tabular handling (CSV, Excel) via Pandas
 * ✅ Extensible CLI/SDK with test coverage and CI workflows
 
 ---
@@ -50,16 +50,16 @@ pip install kopen-data-builder
 
 ```bash
 # 1. Generate metadata.yaml template
-kopen-data-builder metadata run --name seoul-bike --output ./metadata.yaml
+kopen-data-builder metadata init --output ./metadata.yaml
 
 # 2. Run preprocessing (optional)
-kopen-data-builder preprocess run --metadata ./metadata.yaml --output ./preprocessed.csv
+kopen-data-builder preprocess run --input-csv ./raw.csv --output-csv ./preprocessed.csv
 
-# 3. Split dataset into train/valid/test
-kopen-data-builder split run --metadata ./metadata.yaml --input ./preprocessed.csv --output ./splits.json
+# 3. Split dataset into train/test
+kopen-data-builder split split --input-csv ./preprocessed.csv --split-json ./splits.json --output-dir ./splits
 
 # 4. Build HF repository structure
-kopen-data-builder build run cli-test ./splits.json ./hf_repo
+kopen-data-builder build run --dataset-name cli-test --csv-json-path ./splits.json --output-dir ./hf_repo --metadata-path ./metadata.yaml
 
 # 5. Upload to Hugging Face Hub
 kopen-data-builder upload run --repo-dir ./hf_repo --repo-id username/seoul-bike

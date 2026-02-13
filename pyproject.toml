@@ -20,6 +20,7 @@ dependencies = [
     "pandas",
     "datasets",
     "pydantic",
+    "huggingface_hub",
     "scikit-learn"
 ]
 

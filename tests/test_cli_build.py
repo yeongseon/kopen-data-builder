@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import sys
 import tempfile
 
 import pandas as pd
@@ -25,7 +26,7 @@ def test_cli_build_repository() -> None:
 
         result = subprocess.run(
             [
-                "python",
+                sys.executable,
                 "-m",
                 "kopen_data_builder.cli.main",
                 "build",

@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 import tempfile
 
 import pandas as pd
@@ -24,7 +25,7 @@ def test_cli_split_merge() -> None:
     try:
         result = subprocess.run(
             [
-                "python",
+                sys.executable,
                 "-m",
                 "kopen_data_builder.cli.main",
                 "split",

@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 import tempfile
 
 import pandas as pd
@@ -26,7 +27,7 @@ def test_cli_preprocess_csv() -> None:
         # Run CLI command
         result = subprocess.run(
             [
-                "python",
+                sys.executable,
                 "-m",
                 "kopen_data_builder.cli.main",
                 "preprocess",

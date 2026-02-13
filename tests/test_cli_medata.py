@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+import sys
 import tempfile
 
 
@@ -12,7 +13,7 @@ def test_cli_init_metadata_success() -> None:
 
         result = subprocess.run(
             [
-                "python",
+                sys.executable,
                 "-m",
                 "kopen_data_builder.cli.main",
                 "metadata",
@@ -64,7 +65,7 @@ splits:
     try:
         result = subprocess.run(
             [
-                "python",
+                sys.executable,
                 "-m",
                 "kopen_data_builder.cli.main",
                 "metadata",
@@ -99,7 +100,7 @@ tags: [example]
     try:
         result = subprocess.run(
             [
-                "python",
+                sys.executable,
                 "-m",
                 "kopen_data_builder.cli.main",
                 "metadata",
